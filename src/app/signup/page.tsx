@@ -1,13 +1,13 @@
 import WelcomeSection from '@/components/auth/WelcomeSection';
-import LoginForm from '@/components/auth/LoginForm';
+import SignupForm from '@/components/auth/SignupForm';
 
-const LoginPage = () => {
+const SignUpPage = () => {
   return (
     <div className='flex h-full gap-4 items-center'>
       <WelcomeSection />
-      <LoginForm />
+      <SignupForm />
     </div>
   );
 };
 
-export default LoginPage;
+export default SignUpPage;
