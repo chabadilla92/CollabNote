@@ -3,23 +3,24 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import supabase from '../../../lib/supabase/client';
-import { signUpSchema } from '../../schemas/signup';
+import { signUpSchema } from '../../../schemas/signup';
 import { z } from 'zod';
-import Input from '../ui/Input';
+import Input from '../../../components/ui/Input';
 
 const SignupForm = () => {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [name, setName] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleSignUp = async () => {
     setError(null);
     setLoading(true);
 
     try {
-      signUpSchema.parse({ email, password });
+      signUpSchema.parse({ name, email, password });
     } catch (validationError) {
       if (validationError instanceof z.ZodError) {
         setError(validationError.errors[0].message);
@@ -31,16 +32,41 @@ const SignupForm = () => {
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: { displayName: name },
+      },
     });
-
-    setLoading(false);
 
     if (signUpError) {
       setError(signUpError.message);
-    } else {
-      console.log('User signed up successfully:', data?.user);
-      router.push('/login');
+      console.error('Sign-up error:', signUpError);
+      setLoading(false);
+      return;
     }
+
+    // Insert into your User table using the newly created auth user ID
+    const userId = data.user?.id;
+    if (userId) {
+      const { error: insertError } = await supabase.from('User').insert([
+        {
+          id: userId,
+          display_name: name,
+          email,
+        },
+      ]);
+
+      if (insertError) {
+        setError('User created in auth but failed to save in User table.');
+        console.error('Insert error:', insertError);
+        setLoading(false);
+        return;
+      }
+
+      console.log('User inserted into User table');
+    }
+
+    setLoading(false);
+    router.push('/login');
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -57,6 +83,13 @@ const SignupForm = () => {
         </h1>
 
         <div className='flex flex-col gap-2'>
+          <Input
+            type='name'
+            placeholder='Full Name'
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />
           <Input
             type='email'
             placeholder='Email'

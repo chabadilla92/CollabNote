@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import supabase from '../../../lib/supabase/client';
-import { loginSchema } from '../../schemas/login';
+import supabase from '@/lib/supabase/client';
+import { loginSchema } from '@/schemas/login';
 import { z } from 'zod';
 import Input from '@/components/ui/Input';
 
