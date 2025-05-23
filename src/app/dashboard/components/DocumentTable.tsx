@@ -6,8 +6,9 @@ import {
   fetchDocuments,
   addDocument,
   deleteDocument,
-} from '@/lib/supabase/document';
-import Input from '@/components/ui/Input';
+} from '@/lib/supabase/document.ts';
+import Input from '@/components/ui/Input.tsx';
+import Link from 'next/link.js';
 
 const DocumentTable = () => {
   const session = useSession();
@@ -142,25 +143,38 @@ const DocumentTable = () => {
           </tr>
         </thead>
         <tbody>
-          {documents.map((document) => (
-            <tr key={document.id} className='border-t'>
-              <td className='px-4 py-2'>{document.title}</td>
-              <td className='px-4 py-2'>
-                {new Date(document.created_at).toLocaleString()}
-              </td>
-              <td className='px-4 py-2'>
-                {new Date(document.updated_at).toLocaleString()}
-              </td>
-              <td className='px-4 py-2'>
-                <button
-                  onClick={() => handleDeleteDocument(document.id)}
-                  className='text-red-600 hover:underline cursor-pointer'
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
+          {[...documents]
+            .sort(
+              (a, b) =>
+                new Date(b.created_at).getTime() -
+                new Date(a.created_at).getTime()
+            )
+            .map((document) => (
+              <tr key={document.id} className='border-t'>
+                <td className='p-2'>
+                  <Link
+                    href={`/dashboard/document/${document.id}`}
+                    className='text-blue-600 hover:underline'
+                  >
+                    {document.title}
+                  </Link>
+                </td>
+                <td className='px-4 py-2'>
+                  {new Date(document.created_at).toLocaleString()}
+                </td>
+                <td className='px-4 py-2'>
+                  {new Date(document.updated_at).toLocaleString()}
+                </td>
+                <td className='px-4 py-2'>
+                  <button
+                    onClick={() => handleDeleteDocument(document.id)}
+                    className='text-red-600 hover:underline cursor-pointer'
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
         </tbody>
       </table>
     </div>

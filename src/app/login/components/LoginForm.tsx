@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import supabase from '@/lib/supabase/client';
-import { loginSchema } from '@/schemas/login';
+import { useRouter } from 'next/navigation.js';
+import supabase from '@/lib/supabase/client.ts';
+import { loginSchema } from '@/schemas/login.ts';
 import { z } from 'zod';
-import Input from '@/components/ui/Input';
+import Input from '@/components/ui/Input.tsx';
 
 const LoginForm = () => {
   const router = useRouter();

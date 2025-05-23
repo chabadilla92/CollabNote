@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import supabase from '../../../lib/supabase/client';
-import { signUpSchema } from '../../../schemas/signup';
+import { useRouter } from 'next/navigation.js';
+import supabase from '@/lib/supabase/client.ts';
+import { signUpSchema } from '@/schemas/signup.ts';
 import { z } from 'zod';
-import Input from '../../../components/ui/Input';
+import Input from '@/components/ui/Input.tsx';
 
 const SignupForm = () => {
   const router = useRouter();

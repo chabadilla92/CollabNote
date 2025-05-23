@@ -1,5 +1,6 @@
-import supabase from './client';
+import supabase from "./client.ts";
 
+// fetch all documents based on signed in user
 export const fetchDocuments = async (userId: string): Promise<Document[]> => {
   const { data, error } = await supabase
     .from('Document')
@@ -30,3 +31,25 @@ export const deleteDocument = async (id: string, userId: string) => {
 
   if (error) throw error;
 };
+
+// get document based on id
+export async function getDocumentById(id: string) {
+  const { data, error } = await supabase
+    .from('Document')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+// update single document content
+export async function updateDocumentContent(id: string, content: string) {
+  const { error } = await supabase
+    .from('Document')
+    .update({ content })
+    .eq('id', id);
+
+  if (error) throw error;
+}

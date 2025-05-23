@@ -2,11 +2,13 @@
   "name": "collab-text-editor",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "ws": "node --loader ts-node/esm src/server/websocket-server.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.7.0",

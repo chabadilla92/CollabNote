@@ -1,4 +1,4 @@
-import DocumentTable from './components/DocumentTable';
+import DocumentTable from "./components/DocumentTable.tsx";
 
 const Dashboard = () => {
   return (

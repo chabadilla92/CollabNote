@@ -1,5 +1,5 @@
-import WelcomeSection from '@/components/auth/WelcomeSection';
-import LoginForm from './components/LoginForm'
+import WelcomeSection from '@/components/auth/WelcomeSection.tsx';
+import LoginForm from './components/LoginForm.tsx';
 
 const LoginPage = () => {
   return (

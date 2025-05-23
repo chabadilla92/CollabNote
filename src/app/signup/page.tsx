@@ -1,5 +1,5 @@
-import WelcomeSection from '@/components/auth/WelcomeSection';
-import SignupForm from '@/app/signup/components/SignupForm';
+import WelcomeSection from '@/components/auth/WelcomeSection.tsx';
+import SignupForm from './components/SignupForm.tsx';
 
 const SignUpPage = () => {
   return (
