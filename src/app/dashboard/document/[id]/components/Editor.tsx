@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { updateDocumentContent } from '@/lib/supabase/document.ts';
 import { useWebSocket } from '@/hooks/useWebSocket.ts';
+import { updateDocument } from '@/lib/api/documents.ts';
 
 type Props = {
   docId: string;
@@ -33,8 +33,12 @@ export default function Editor({
   };
 
   const handleSave = async () => {
-    await updateDocumentContent(docId, content);
-    alert('Saved!');
+    try {
+      await updateDocument(docId, content);
+      alert('Saved!');
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Unknown error occurred');
+    }
   };
 
   return (

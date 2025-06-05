@@ -6,7 +6,7 @@ import {
   fetchDocuments,
   addDocument,
   deleteDocument,
-} from '@/lib/supabase/document.ts';
+} from '@/lib/api/documents.ts';
 import Input from '@/components/ui/Input.tsx';
 import Link from 'next/link.js';
 
@@ -24,26 +24,23 @@ const DocumentTable = () => {
   const [adding, setAdding] = useState<boolean>(false);
 
   // Fetch documents
-  const loadDocuments = useCallback(async () => {
-    if (!userId) return;
 
+  const loadDocuments = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const data = await fetchDocuments(userId);
+      const data = await fetchDocuments();
       setDocuments(data);
     } catch (error) {
       console.error(error);
-      if (error instanceof Error) {
-        setError(error.message);
-      } else {
-        setError('Failed to fetch documents.');
-      }
+      setError(
+        error instanceof Error ? error.message : 'Failed to fetch documents.'
+      );
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, []);
 
   useEffect(() => {
     if (!userId) {
@@ -56,6 +53,7 @@ const DocumentTable = () => {
   }, [userId, loadDocuments]);
 
   // Add documents
+
   const handleAddDocument = async () => {
     if (!newTitle.trim()) {
       setError('Title is required.');
@@ -66,34 +64,31 @@ const DocumentTable = () => {
     setError(null);
 
     try {
-      await addDocument(newTitle, newContent, userId!);
-
+      await addDocument(newTitle, newContent);
       setNewTitle('');
       setNewContent('');
       await loadDocuments();
     } catch (error) {
-      if (error instanceof Error) {
-        setError(error.message);
-      } else {
-        setError('Failed to add document.');
-      }
+      setError(
+        error instanceof Error ? error.message : 'Failed to add document.'
+      );
     } finally {
       setAdding(false);
     }
   };
 
   // Delete documents
+
   const handleDeleteDocument = async (id: string) => {
     setError(null);
+
     try {
-      await deleteDocument(id, userId!);
+      await deleteDocument(id);
       await loadDocuments();
     } catch (error) {
-      if (error instanceof Error) {
-        setError(error.message);
-      } else {
-        setError('Failed to delete document.');
-      }
+      setError(
+        error instanceof Error ? error.message : 'Failed to delete document.'
+      );
     }
   };
 

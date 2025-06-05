@@ -1,5 +1,6 @@
 import { getDocumentById } from "@/lib/supabase/document.ts";
 import Editor from "./components/Editor.tsx";
+import prisma from "@/lib/prisma/prisma.ts";
 
 export default async function DocumentPage({
   params,
