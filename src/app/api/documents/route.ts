@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma/prisma.ts';
 import { createSupabaseServerClient } from '@/lib/supabase/server.ts';
 
 export async function POST(req: NextRequest) {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
       data: {
         title,
         content,
-        created_by: user.id, // this is the Supabase user.id
+        createdBy: user.id, // this is the Supabase user.id
       },
     });
 
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET() {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -49,8 +49,8 @@ export async function GET() {
 
   try {
     const documents = await prisma.document.findMany({
-      where: { created_by: user.id },
-      orderBy: { updated_at: 'desc' },
+      where: { createdBy: user.id },
+      orderBy: { updatedAt: 'desc' },
     });
 
     return NextResponse.json(documents);

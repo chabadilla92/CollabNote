@@ -1,4 +1,4 @@
-import WelcomeSection from '@/components/auth/WelcomeSection.tsx';
+import WelcomeSection from '@/components/ui/WelcomeSection.tsx';
 import LoginForm from './components/LoginForm.tsx';
 
 const LoginPage = () => {

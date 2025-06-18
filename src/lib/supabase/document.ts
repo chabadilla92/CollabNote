@@ -1,15 +1,15 @@
 import supabase from "./client.ts";
 
 // fetch all documents based on signed in user
-export const fetchDocuments = async (userId: string): Promise<Document[]> => {
+export const fetchDocuments = async (): Promise<Document[]> => {
   const { data, error } = await supabase
     .from('Document')
-    .select('*')
-    .eq('created_by', userId);
+    .select('*');
 
   if (error) throw error;
   return data || [];
 };
+
 
 export const addDocument = async (
   title: string,

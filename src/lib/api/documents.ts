@@ -1,9 +1,23 @@
-export async function getDocument(docId: string) {
-    const res = await fetch(`/api/documents/${docId}`);
-    if (!res.ok) throw new Error('Failed to fetch document');
-    return res.json();
+function getBaseUrl() {
+  if (typeof window !== 'undefined') return ''; // running in browser
+  // Vercel/production env
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  // local dev
+  return 'http://localhost:3000';
+}
+
+export async function getDocument(docId: string): Promise<Document> {
+  const baseUrl = getBaseUrl();
+  const res = await fetch(`${baseUrl}/api/documents/${docId}`, {
+    cache: 'no-store', // optional: prevent caching
+  });
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData.error || 'Failed to fetch document');
   }
-  
+  return res.json();
+}
+
   export async function updateDocument(docId: string, content: string) {
     const res = await fetch(`/api/documents/${docId}`, {
       method: 'PUT',

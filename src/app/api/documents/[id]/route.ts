@@ -6,7 +6,7 @@ export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -30,7 +30,7 @@ export async function GET(
     }
 
     // Optional: Only return if current user is the owner
-    if (document.created_by !== user.id) {
+    if (document.createdBy !== user.id) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -49,7 +49,7 @@ export async function PUT(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -68,7 +68,7 @@ export async function PUT(
       where: { id: docId },
     });
 
-    if (!existing || existing.created_by !== user.id) {
+    if (!existing || existing.createdBy !== user.id) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -77,7 +77,7 @@ export async function PUT(
       data: {
         title,
         content,
-        updated_at: new Date(),
+        updatedAt: new Date(),
       },
     });
 
@@ -96,7 +96,7 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -112,7 +112,7 @@ export async function DELETE(
       where: { id: docId },
     });
 
-    if (!existing || existing.created_by !== user.id) {
+    if (!existing || existing.createdBy !== user.id) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

@@ -75,7 +75,7 @@ const LoginForm = () => {
         )}
 
         <button
-          className='bg-blue-300 border-2 rounded-md border-blue-300 text-white text-md h-10 cursor-pointer hover:bg-blue-400 hover:border-blue-400'
+          className='bg-gray-800 border-2 rounded-md border-gray-800 text-white text-md h-10 cursor-pointer hover:bg-gray-800 hover:bg-gray-800'
           onClick={handleLogin}
           disabled={loading}
         >
@@ -85,7 +85,7 @@ const LoginForm = () => {
         <div className='text-center text-sm'>
           <p>
             Don't have an account?{' '}
-            <a href='/signup' className='text-blue-300'>
+            <a href='/signup' className='text-blue-500 hover:text-blue-300'>
               Sign up
             </a>
           </p>

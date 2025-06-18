@@ -7,20 +7,38 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id          String     @id @default(uuid()) @db.Uuid
-  email       String
-  displayName String?    @map("display_name")
-  createdAt   DateTime?  @default(now()) @map("created_at") @db.Timestamptz(6)
-  Document    Document[]
+model DocumentShare {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  documentId String    @map("document_id") @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  document   Document  @relation("DocumentShares", fields: [documentId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user       User      @relation("UserSharedDocuments", fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([documentId, userId], map: "uniq_document_user")
+  @@map("DocumentShare")
 }
 
 model Document {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  title      String
-  content    String   @default("")
-  created_at DateTime @default(now()) @db.Timestamptz(6)
-  updated_at DateTime @default(now()) @db.Timestamptz(6)
-  created_by String   @db.Uuid
-  User       User     @relation(fields: [created_by], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "Document_createdby_fkey")
+  id        String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title     String
+  content   String          @default("")
+  createdAt DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime        @default(now()) @map("updated_at") @db.Timestamptz(6)
+  createdBy String          @map("created_by") @db.Uuid
+  author    User            @relation("UserDocuments", fields: [createdBy], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "Document_createdby_fkey")
+  shares    DocumentShare[] @relation("DocumentShares")
+
+  @@map("Document")
+}
+
+model User {
+  id              String          @id @db.Uuid
+  email           String
+  displayName     String?         @map("display_name")
+  createdAt       DateTime?       @default(now()) @map("created_at") @db.Timestamptz(6)
+  documents       Document[]      @relation("UserDocuments")
+  sharedDocuments DocumentShare[] @relation("UserSharedDocuments")
+
+  @@map("User")
 }

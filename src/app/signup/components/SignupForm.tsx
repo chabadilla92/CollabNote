@@ -33,7 +33,7 @@ const SignupForm = () => {
       email,
       password,
       options: {
-        data: { displayName: name },
+        data: { display_name: name },
       },
     });
 
@@ -42,27 +42,6 @@ const SignupForm = () => {
       console.error('Sign-up error:', signUpError);
       setLoading(false);
       return;
-    }
-
-    // Insert into your User table using the newly created auth user ID
-    const userId = data.user?.id;
-    if (userId) {
-      const { error: insertError } = await supabase.from('User').insert([
-        {
-          id: userId,
-          display_name: name,
-          email,
-        },
-      ]);
-
-      if (insertError) {
-        setError('User created in auth but failed to save in User table.');
-        console.error('Insert error:', insertError);
-        setLoading(false);
-        return;
-      }
-
-      console.log('User inserted into User table');
     }
 
     setLoading(false);
