@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useWebSocket } from '@/hooks/useWebSocket.ts';
-import { updateDocument } from '@/lib/api/documents.ts';
+import { updateDocument, shareDocument } from '@/lib/api/documents.ts';
 
 type Props = {
   initialContent: string;
@@ -11,6 +11,7 @@ type Props = {
 
 export default function Editor({ initialContent, docId }: Props) {
   const [content, setContent] = useState(initialContent);
+  const [shareEmail, setShareEmail] = useState('');
   const editorRef = useRef<HTMLDivElement>(null);
 
   const handleMessage = useCallback((data: any) => {
@@ -43,6 +44,17 @@ export default function Editor({ initialContent, docId }: Props) {
     }
   };
 
+  const handleShare = async () => {
+    try {
+      await shareDocument(docId, shareEmail);
+      alert(`Document shared with ${shareEmail}`);
+      setShareEmail('');
+    } catch (e) {
+      console.error(e);
+      alert('Error sharing document');
+    }
+  };
+
   return (
     <div className='max-w-[8.5in] mx-auto my-4 bg-white p-8 border shadow-md'>
       <div
@@ -53,12 +65,30 @@ export default function Editor({ initialContent, docId }: Props) {
         className='prose min-h-[11in] outline-none'
         placeholder='Start typing...'
       />
-      <button
-        className='mt-4 bg-gray-800 text-white px-4 py-2 rounded cursor-pointer hover:bg-blue-500'
-        onClick={handleSave}
-      >
-        Save
-      </button>
+      <div className='mt-4 flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-2 sm:space-y-0'>
+        <button
+          className='bg-gray-800 text-white px-4 py-2 rounded cursor-pointer hover:bg-blue-500'
+          onClick={handleSave}
+        >
+          Save
+        </button>
+
+        <input
+          type='email'
+          value={shareEmail}
+          onChange={(e) => setShareEmail(e.target.value)}
+          placeholder='Enter email to share'
+          className='border px-3 py-2 rounded w-full sm:w-auto'
+        />
+
+        <button
+          className='bg-green-600 text-white px-4 py-2 rounded cursor-pointer hover:bg-green-700'
+          onClick={handleShare}
+          disabled={!shareEmail}
+        >
+          Share
+        </button>
+      </div>
     </div>
   );
 }

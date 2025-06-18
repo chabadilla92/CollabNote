@@ -3,10 +3,11 @@ import prisma from '@/lib/prisma/prisma.ts';
 import { createSupabaseServerClient } from '@/lib/supabase/server.ts';
 
 export async function GET(
-  req: NextRequest,
+  req: Request,
   { params }: { params: { id: string } }
 ) {
   const supabase = await createSupabaseServerClient();
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -23,55 +24,76 @@ export async function GET(
     });
 
     if (!document) {
-      return NextResponse.json(
-        { error: 'Document not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Document not found' }, { status: 404 });
     }
 
-    // Optional: Only return if current user is the owner
-    if (document.createdBy !== user.id) {
+    const isOwner = document.createdBy === user.id;
+
+    const isShared = await prisma.documentShare.findFirst({
+      where: {
+        documentId: docId,
+        userId: user.id,
+      },
+    });
+
+    if (!isOwner && !isShared) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     return NextResponse.json(document);
   } catch (error) {
-    console.error('[GET_DOC_ERROR]', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch document' },
-      { status: 500 }
-    );
+    console.error(error);
+    return NextResponse.json({ error: 'Failed to fetch document' }, { status: 500 });
   }
 }
 
 // PUT /api/documents/[id]
 export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
+  req: Request,
+  context: { params: { id: string } }
 ) {
+  // Await params before accessing
+  const params = await context.params;
+  const docId = params.id;
+
   const supabase = await createSupabaseServerClient();
+
+  // Get user from Supabase auth session
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const docId = params.id;
   const body = await req.json();
   const { title, content } = body;
 
   try {
-    // Optional: Validate ownership before update
+    // Fetch document ownership info
     const existing = await prisma.document.findUnique({
       where: { id: docId },
+      select: { createdBy: true },
     });
 
-    if (!existing || existing.createdBy !== user.id) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    if (!existing) {
+      return NextResponse.json({ error: "Document not found" }, { status: 404 });
     }
 
+    // Check if user is owner
+    const isOwner = existing.createdBy === user.id;
+
+    // Check if user has share permission
+    const isShared = await prisma.documentShare.findFirst({
+      where: { documentId: docId, userId: user.id },
+    });
+
+    if (!isOwner && !isShared) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // Update document content/title
     const updatedDocument = await prisma.document.update({
       where: { id: docId },
       data: {
@@ -81,11 +103,19 @@ export async function PUT(
       },
     });
 
+    // If user is shared user, update DocumentShare.updatedAt timestamp
+    if (isShared) {
+      await prisma.documentShare.updateMany({
+        where: { documentId: docId, userId: user.id },
+        data: { updatedAt: new Date() },
+      });
+    }
+
     return NextResponse.json(updatedDocument);
   } catch (error) {
-    console.error('[UPDATE_DOC_ERROR]', error);
+    console.error("[UPDATE_DOC_ERROR]", error);
     return NextResponse.json(
-      { error: 'Failed to update document' },
+      { error: "Failed to update document" },
       { status: 500 }
     );
   }

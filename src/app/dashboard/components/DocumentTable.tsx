@@ -14,7 +14,7 @@ import { TrashIcon } from 'lucide-react';
 const DocumentTable = () => {
   const session = useSession();
   const userId = session?.user?.id;
-  const displayName = session?.user?.user_metadata?.displayName;
+  const displayName = session?.user?.user_metadata?.display_name;
 
   const [documents, setDocuments] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -99,7 +99,9 @@ const DocumentTable = () => {
   }
   return (
     <div>
-      <h1 className='text-2xl text-gray-800 font-bold mb-4'>Welcome {displayName}!</h1>
+      <h1 className='text-2xl text-gray-800 font-bold mb-4'>
+        Welcome {displayName}!
+      </h1>
 
       {/* Add Document Form */}
       <div className='mb-6'>

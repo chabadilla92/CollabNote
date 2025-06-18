@@ -11,7 +11,10 @@ model DocumentShare {
   id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   documentId String    @map("document_id") @db.Uuid
   userId     String    @map("user_id") @db.Uuid
-  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  createdBy  String    @map("created_by") @db.Uuid
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
   document   Document  @relation("DocumentShares", fields: [documentId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   user       User      @relation("UserSharedDocuments", fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
@@ -27,7 +30,7 @@ model Document {
   updatedAt DateTime        @default(now()) @map("updated_at") @db.Timestamptz(6)
   createdBy String          @map("created_by") @db.Uuid
   author    User            @relation("UserDocuments", fields: [createdBy], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "Document_createdby_fkey")
-  shares    DocumentShare[] @relation("DocumentShares")
+  DocumentShare DocumentShare[]  @relation("DocumentShares")
 
   @@map("Document")
 }

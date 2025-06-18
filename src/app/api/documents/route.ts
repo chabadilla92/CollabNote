@@ -49,7 +49,18 @@ export async function GET() {
 
   try {
     const documents = await prisma.document.findMany({
-      where: { createdBy: user.id },
+      where: {
+        OR: [
+          { createdBy: user.id },
+          {
+            DocumentShare: {
+              some: {
+                userId: user.id,
+              },
+            },
+          },
+        ],
+      },
       orderBy: { updatedAt: 'desc' },
     });
 

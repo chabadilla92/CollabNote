@@ -64,3 +64,16 @@ export async function getDocument(docId: string): Promise<Document> {
     }
   }
   
+  export async function shareDocument(docId: string, email: string): Promise<void> {
+    const res = await fetch(`/api/documents/${docId}/share`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+  
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || 'Failed to share document');
+    }
+  }
+  
