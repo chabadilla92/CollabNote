@@ -3,6 +3,8 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useWebSocket } from '@/hooks/useWebSocket.ts';
 import { updateDocument, shareDocument } from '@/lib/api/documents.ts';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import debounce from 'lodash.debounce';
 
 type Props = {
   initialContent: string;
@@ -13,6 +15,32 @@ export default function Editor({ initialContent, docId }: Props) {
   const [content, setContent] = useState(initialContent);
   const [shareEmail, setShareEmail] = useState('');
   const editorRef = useRef<HTMLDivElement>(null);
+  const supabase = createClientComponentClient();
+
+  useEffect(() => {
+    const channel = supabase
+      .channel(`realtime-doc-${docId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE', // just listen to updates
+          schema: 'public',
+          table: 'Document',
+          filter: `id=eq.${docId}`,
+        },
+        (payload) => {
+          const newContent = payload.new?.content;
+          if (newContent && newContent !== content) {
+            setContent(newContent);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [supabase, docId, content]);
 
   const handleMessage = useCallback((data: any) => {
     if (data.type === 'update') {
@@ -28,12 +56,23 @@ export default function Editor({ initialContent, docId }: Props) {
     }
   }, [content]);
 
+  // -- Debounced autosave --
+  const debouncedSave = useRef(
+    debounce(async (content: string) => {
+      try {
+        await updateDocument(docId, content);
+      } catch (err) {
+        console.error('Autosave failed:', err);
+      }
+    }, 1000)
+  ).current;
+
   const handleInput = () => {
-    if (editorRef.current) {
-      const updated = editorRef.current.innerHTML;
-      setContent(updated);
-      send({ type: 'update', content: updated });
-    }
+    if (!editorRef.current) return;
+    const updated = editorRef.current.innerHTML;
+    setContent(updated);
+    send({ type: 'update', content: updated }); // Optional WebSocket broadcast
+    debouncedSave(updated); // Autosave to DB
   };
 
   const handleSave = async () => {

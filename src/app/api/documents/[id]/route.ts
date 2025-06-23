@@ -3,11 +3,14 @@ import prisma from '@/lib/prisma/prisma.ts';
 import { createSupabaseServerClient } from '@/lib/supabase/server.ts';
 
 export async function GET(
-  req: Request,
+  req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const supabase = await createSupabaseServerClient();
+  const awaitedParams = await params;
+  const docId = awaitedParams.id;
+  
 
+  const supabase = await createSupabaseServerClient(); // ✅ handles cookies properly inside
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -16,34 +19,32 @@ export async function GET(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const docId = params.id;
-
   try {
-    const document = await prisma.document.findUnique({
-      where: { id: docId },
-    });
-
-    if (!document) {
-      return NextResponse.json({ error: 'Document not found' }, { status: 404 });
-    }
-
-    const isOwner = document.createdBy === user.id;
-
-    const isShared = await prisma.documentShare.findFirst({
+    const document = await prisma.document.findFirst({
       where: {
-        documentId: docId,
-        userId: user.id,
+        id: docId,
+        OR: [
+          { createdBy: user.id },
+          {
+            DocumentShare: {
+              some: { userId: user.id },
+            },
+          },
+        ],
       },
     });
 
-    if (!isOwner && !isShared) {
+    if (!document) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     return NextResponse.json(document);
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: 'Failed to fetch document' }, { status: 500 });
+    console.error('[DOC_FETCH_ERROR]', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch document' },
+      { status: 500 }
+    );
   }
 }
 
