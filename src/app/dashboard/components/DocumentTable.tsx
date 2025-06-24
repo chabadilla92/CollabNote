@@ -8,15 +8,18 @@ import {
   deleteDocument,
 } from '@/lib/api/documents.ts';
 import Input from '@/components/ui/Input.tsx';
-import Link from 'next/link.js';
+import LinkModule from 'next/link.js';
 import { TrashIcon } from 'lucide-react';
+import { DocumentType } from '@/types.ts';
 
 const DocumentTable = () => {
+  const Link = LinkModule.default || LinkModule;
+
   const session = useSession();
   const userId = session?.user?.id;
   const displayName = session?.user?.user_metadata?.display_name;
 
-  const [documents, setDocuments] = useState<any[]>([]);
+  const [documents, setDocuments] = useState<DocumentType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,7 +33,7 @@ const DocumentTable = () => {
     setError(null);
 
     try {
-      const data = await fetchDocuments();
+      const data: DocumentType[] = await fetchDocuments();
       setDocuments(data);
     } catch (error) {
       console.error(error);
@@ -142,8 +145,8 @@ const DocumentTable = () => {
           {[...documents]
             .sort(
               (a, b) =>
-                new Date(b.createdAt).getTime() -
-                new Date(a.createdAt).getTime()
+                new Date(b.createdAt ?? '').getTime() -
+                new Date(a.createdAt ?? '').getTime()
             )
             .map((document) => (
               <tr key={document.id} className='border-t'>
@@ -156,14 +159,14 @@ const DocumentTable = () => {
                   </Link>
                 </td>
                 <td className='px-4 py-2'>
-                  {new Date(document.createdAt).toLocaleString()}
+                  {new Date(document.createdAt ?? '').toLocaleString()}
                 </td>
                 <td className='px-4 py-2'>
-                  {new Date(document.updatedAt).toLocaleString()}
+                  {new Date(document.updatedAt ?? '').toLocaleString()}
                 </td>
                 <td className='px-4 py-2'>
                   <button
-                    onClick={() => handleDeleteDocument(document.id)}
+                    onClick={() => handleDeleteDocument(document.id ?? '')}
                     className='text-red-600 hover:underline cursor-pointer'
                   >
                     <TrashIcon className='w-3 h-3' />

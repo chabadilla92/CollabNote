@@ -5,10 +5,11 @@ import { getDocument } from '@/lib/api/documents.ts';
 import Editor from './components/Editor.tsx';
 import Navbar from '@/components/ui/Navbar.tsx';
 import { useParams } from 'next/navigation.js';
+import { DocumentType } from '@/types.ts';
 
 export default function DocumentPage() {
   const { id } = useParams() as { id: string };
-  const [doc, setDoc] = useState<Document | null>(null);
+  const [doc, setDoc] = useState<DocumentType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,7 +32,7 @@ export default function DocumentPage() {
       <Navbar />
       <div className='flex-1 pl-16 px-4 py-6 max-w-4xl mx-auto'>
         <h1 className='text-xl font-bold'>{doc.title}</h1>
-        <Editor initialContent={doc.content} docId={doc.id} />
+        <Editor initialContent={doc.content ?? ''} docId={doc.id ?? ''} />
       </div>
     </div>
   );

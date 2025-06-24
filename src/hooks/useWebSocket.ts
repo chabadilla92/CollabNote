@@ -1,6 +1,12 @@
 import { useEffect, useRef } from 'react';
 
-export function useWebSocket(docId: string, onMessage: (data: any) => void) {
+type WebSocketMessage = {
+  type: 'update'; // you can extend this union as needed
+  content: string;
+  docId: string;
+};
+
+export function useWebSocket(docId: string, onMessage: (data: WebSocketMessage) => void) {
   const socketRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
@@ -33,7 +39,7 @@ export function useWebSocket(docId: string, onMessage: (data: any) => void) {
     };
   }, [docId, onMessage]);
 
-  const send = (data: any) => {
+  const send = (data: Omit<WebSocketMessage, 'docId'>) => {
     socketRef.current?.send(JSON.stringify({ docId, ...data }));
   };
 

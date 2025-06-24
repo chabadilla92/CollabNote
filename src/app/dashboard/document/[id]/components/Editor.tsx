@@ -11,6 +11,11 @@ type Props = {
   docId: string;
 };
 
+type WebSocketMessage = {
+  type: 'update';
+  content: string;
+};
+
 export default function Editor({ initialContent, docId }: Props) {
   const [content, setContent] = useState(initialContent);
   const [shareEmail, setShareEmail] = useState('');
@@ -42,7 +47,7 @@ export default function Editor({ initialContent, docId }: Props) {
     };
   }, [supabase, docId, content]);
 
-  const handleMessage = useCallback((data: any) => {
+  const handleMessage = useCallback((data: WebSocketMessage) => {
     if (data.type === 'update') {
       setContent(data.content);
     }
@@ -102,7 +107,6 @@ export default function Editor({ initialContent, docId }: Props) {
         onInput={handleInput}
         suppressContentEditableWarning
         className='prose min-h-[11in] outline-none'
-        placeholder='Start typing...'
       />
       <div className='mt-4 flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-2 sm:space-y-0'>
         <button

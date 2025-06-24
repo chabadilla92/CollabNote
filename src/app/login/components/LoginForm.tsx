@@ -28,7 +28,7 @@ const LoginForm = () => {
       }
     }
 
-    const { data, error: loginError } = await supabase.auth.signInWithPassword({
+    const { error: loginError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -84,7 +84,7 @@ const LoginForm = () => {
 
         <div className='text-center text-sm'>
           <p>
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <a href='/signup' className='text-blue-500 hover:text-blue-300'>
               Sign up
             </a>

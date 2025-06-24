@@ -1,14 +1,7 @@
 // app/layout.tsx
 import './globals.css';
 import type { Metadata } from 'next';
-import { Ubuntu } from 'next/font/google';
-import SupabaseProvider from '@/providers/SupabaseProvider';
-
-const ubuntu = Ubuntu({
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '700'],
-  display: 'swap',
-});
+import SupabaseProvider from '@/providers/SupabaseProvider.tsx';
 
 export const metadata: Metadata = {
   title: 'CollabNote',
@@ -20,9 +13,18 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  /* eslint-disable @next/next/no-page-custom-font */
+
   return (
     <html lang='en'>
-      <body className={`${ubuntu.className} h-[100dvh] bg-white`}>
+      <head>
+        {/* Load Ubuntu font from Google Fonts */}
+        <link
+          href='https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap'
+          rel='stylesheet'
+        />
+      </head>
+      <body className='font-ubuntu h-[100dvh] bg-white'>
         <SupabaseProvider>{children}</SupabaseProvider>
       </body>
     </html>

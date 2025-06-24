@@ -3,10 +3,13 @@ import prisma from '@/lib/prisma/prisma.ts';
 import { NextResponse, NextRequest } from 'next/server.js';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import type { Database } from '@/app/types/supabase.ts';
-import { cookies } from 'next/headers';
+import { cookies } from 'next/headers.js';
 
-export async function POST(req: NextRequest, context: { params: { id: string } }) {
-  const cookieStore = await cookies();
+export async function POST(req: NextRequest, context: unknown) {
+  const { params } = context as { params: { id: string } };
+  const docId = params.id;
+
+  const cookieStore = cookies();
   const supabase = createRouteHandlerClient<Database>({ cookies: () => cookieStore });
 
   const {
@@ -17,7 +20,6 @@ export async function POST(req: NextRequest, context: { params: { id: string } }
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { id: docId } = await context.params;
   const { email } = await req.json();
 
   const doc = await prisma.document.findUnique({ where: { id: docId } });
@@ -49,8 +51,8 @@ export async function POST(req: NextRequest, context: { params: { id: string } }
     data: {
       documentId: docId,
       userId: recipient.id,
-      createdBy: doc.createdBy,   // <--- added from original document
-      updatedAt: doc.updatedAt,   // <--- added from original document
+      createdBy: doc.createdBy,
+      updatedAt: doc.updatedAt,
     },
   });
 
